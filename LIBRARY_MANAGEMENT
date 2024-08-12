@@ -1,0 +1,376 @@
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <cstring>
+
+using namespace std;
+
+// Define a struct to hold user credentials
+struct User {
+    char username[50];
+    char password[50];
+};
+
+// Function to authenticate admin user
+bool authenticateAdmin(const char* username, const char* password) {
+    // Hardcoded admin user ID and password
+    const char* adminUserID = "admin";
+    const char* adminPassword = "admin123";
+
+    return (strcmp(username, adminUserID) == 0 && strcmp(password, adminPassword) == 0);
+}
+
+// Function to authenticate faculty user
+bool authenticateFaculty(const char* username, const char* password) {
+    // Hardcoded faculty user ID and password
+    const char* facultyUserID = "faculty";
+    const char* facultyPassword = "faculty123";
+
+    return (strcmp(username, facultyUserID) == 0 && strcmp(password, facultyPassword) == 0);
+}
+
+// Function to authenticate student user
+bool authenticateStudent(const char* username, const char* password) {
+    // Hardcoded student user ID and password
+    const char* studentUserID = "student";
+    const char* studentPassword = "student123";
+
+    return (strcmp(username, studentUserID) == 0 && strcmp(password, studentPassword) == 0);
+}
+
+// Function to authenticate guest user
+bool authenticateGuest() {
+    // No authentication needed for guest
+    return true;
+}
+
+// Function to handle user login
+bool login(const char* userType) {
+    char username[50];
+    char password[50];
+
+    if (strcmp(userType, "guest") == 0) {
+        return authenticateGuest();
+    }
+
+    int attempts = 0; // Counter for login attempts
+    while (attempts < 5) {
+        cout << "\nEnter " << userType << " username: ";
+        cin.getline(username, 50); // Use getline to allow spaces in username
+        cout << "Enter " << userType << " password: ";
+        cin.getline(password, 50); // Use getline to allow spaces in password
+
+        if (strcmp(userType, "admin") == 0 && authenticateAdmin(username, password)) {
+            return true; // Successful admin login
+        } else if (strcmp(userType, "faculty") == 0 && authenticateFaculty(username, password)) {
+            return true; // Successful faculty login
+        } else if (strcmp(userType, "student") == 0 && authenticateStudent(username, password)) {
+            return true; // Successful student login
+        } else {
+            cout << "Invalid username or password. Please try again.\n";
+            attempts++;
+            cout << "Attempts left: " << 5 - attempts << endl;
+        }
+    }
+
+    // Max attempts reached
+    cout << "Maximum login attempts reached. Exiting...\n";
+    return false;
+}
+
+class Item {
+    int itemNo;
+    char itemName[50];
+    char author[50];
+    char category[50];
+    float price, quantity, tax, discount;
+
+public:
+    void getData() {
+        system("cls");
+        cout << "\nPlease enter the item number: ";
+        cin >> itemNo;
+        cout << "\nPlease enter the name of the item: ";
+        cin.ignore();
+        cin.getline(itemName, 50);
+        cout << "\nPlease enter the author: ";
+        cin.getline(author, 50);
+        cout << "\nPlease enter the category: ";
+        cin.getline(category, 50);
+        cout << "\nPlease enter the price of the item: ";
+        cin >> price;
+        cout << "\nPlease enter the quantity: ";
+        cin >> quantity;
+        cout << "\nPlease enter the tax: ";
+        cin >> tax;
+        cout << "\nPlease enter the discount (%): ";
+        cin >> discount;
+    }
+
+    void showData() {
+        system("cls");
+        cout << "\nItem Number: " << itemNo;
+        cout << "\nItem Name: " << itemName;
+        cout << "\nAuthor: " << author;
+        cout << "\nCategory: " << category;
+        cout << "\nItem Price: " << price;
+        cout << "\nQuantity: " << quantity;
+        cout << "\nTax: " << tax;
+        cout << "\nDiscount: " << discount << "%";
+        float discountedAmount = price - (price * discount / 100);
+        cout << "\nDiscounted Amount: " << discountedAmount;
+    }
+
+    int retItemNo() {
+        return itemNo;
+    }
+
+    float retPrice() {
+        return price;
+    }
+
+    char* retItemName() {
+        return itemName;
+    }
+
+    char* retAuthor() {
+        return author;
+    }
+
+    char* retCategory() {
+        return category;
+    }
+
+    float retQuantity() {
+        return quantity;
+    }
+
+    float retTax() {
+        return tax;
+    }
+
+    float retDiscount() {
+        return discount;
+    }
+
+    void modifyData() {
+        system("cls");
+        cout << "\nItem Number: " << itemNo;
+        cout << "\nEnter the new name of the item: ";
+        cin.ignore();
+        cin.getline(itemName, 50);
+        cout << "\nEnter the new author: ";
+        cin.getline(author, 50);
+        cout << "\nEnter the new category: ";
+        cin.getline(category, 50);
+        cout << "\nEnter the new price of the item: ";
+        cin >> price;
+        cout << "\nEnter the new quantity: ";
+        cin >> quantity;
+        cout << "\nEnter the new tax: ";
+        cin >> tax;
+        cout << "\nEnter the new discount (%): ";
+        cin >> discount;
+    }
+};
+
+fstream file;
+Item item;
+
+void writeToFile() {
+    file.open("store.dat", ios::out | ios::app);
+    item.getData();
+    file.write((char*)&item, sizeof(item));
+    file.close();
+    cout << "\n\nThe item has been created." << endl;
+}
+
+void displayAll() {
+    system("cls");
+    cout << "\n\n\n\tDisplay all records!!!" << endl;
+    file.open("store.dat", ios::in);
+    while (file.read((char*)&item, sizeof(item))) {
+        item.showData();
+        cout << "\n\n=========================\n";
+    }
+    file.close();
+}
+
+void displayItem(int itemNumber) {
+    system("cls");
+    cout << "\n\n\tDisplay Item Details!!!" << endl;
+    file.open("store.dat", ios::in);
+    bool found = false;
+    while (file.read((char*)&item, sizeof(item))) {
+        if (item.retItemNo() == itemNumber) {
+            item.showData();
+            found = true;
+            break;
+        }
+    }
+    file.close();
+    if (!found) {
+        cout << "\n\nItem with Item Number " << itemNumber << " not found." << endl;
+    }
+}
+
+void placeOrder() {
+    // Functionality to place orders will be added here based on user type.
+    // Not implemented in this version.
+}
+
+void modify() {
+    int itemNumber;
+    system("cls");
+    cout << "\n\n\tModify Item Details!!!" << endl;
+    cout << "\nEnter the item number to modify: ";
+    cin >> itemNumber;
+    file.open("store.dat", ios::in | ios::out);
+    bool found = false;
+    while (file.read((char*)&item, sizeof(item)) && found == false) {
+        if (item.retItemNo() == itemNumber) {
+            item.showData();
+            item.modifyData();
+            int pos = -1 * static_cast<int>(sizeof(item));
+            file.seekp(pos, ios::cur);
+            file.write((char*)&item, sizeof(item));
+            cout << "\n\n\t Record updated";
+            found = true;
+        }
+    }
+    file.close();
+    if (!found) {
+        cout << "\n\n Record not found";
+    }
+}
+
+void deleteRec() {
+    int itemNumber;
+    system("cls");
+    cout << "\n\n\tDelete Item!!!" << endl;
+    cout << "\nEnter the item number to delete: ";
+    cin >> itemNumber;
+    file.open("store.dat", ios::in | ios::out);
+    fstream tempFile;
+    tempFile.open("temp.dat", ios::out);
+    file.seekg(0, ios::beg);
+    while (file.read((char*)&item, sizeof(item))) {
+        if (item.retItemNo() != itemNumber) {
+            tempFile.write((char*)&item, sizeof(item));
+        }
+    }
+    tempFile.close();
+    file.close();
+    remove("store.dat");
+    rename("temp.dat", "store.dat");
+    cout << "\n\n\tRecord deleted..";
+}
+
+void adminMenu() {
+    char ch2;
+    do {
+        system("cls");
+        cout << "\n\n\tADMIN MENU";
+        cout << "\n\t1. CREATE ITEM";
+        cout << "\n\t2. DISPLAY ALL ITEMS";
+        cout << "\n\t3. QUERY";
+        cout << "\n\t4. MODIFY ITEM";
+        cout << "\n\t5. DELETE ITEM";
+        cout << "\n\t6. ADD/REMOVE USER";
+        cout << "\n\t7. BACK TO MAIN MENU";
+        cout << "\n\n\tPlease enter your choice (1-7): ";
+        cin >> ch2;
+        switch (ch2) {
+            case '1':
+                system("cls");
+                writeToFile();
+                break;
+            case '2':
+                displayAll();
+                break;
+            case '3': {
+                int num;
+                system("cls");
+                cout << "\n\n\tPlease enter the item number: ";
+                cin >> num;
+                displayItem(num);
+                break;
+            }
+            case '4':
+                modify();
+                break;
+            case '5':
+                deleteRec();
+                break;
+            case '6':
+                // Add/remove user functionality will be added here.
+                break;
+            case '7':
+                break;
+            default:
+                cout << "\a";
+        }
+    } while (ch2 != '7');
+}
+
+void studentMenu() {
+    // Implement student menu here based on the provided specifications.
+}
+
+void facultyMenu() {
+    // Implement faculty menu here based on the provided specifications.
+}
+
+int main() {
+    char choice;
+    do {
+        system("cls");
+        cout << "Welcome to the Inventory Management System\n";
+        cout << "----------------------------------------\n";
+        cout << "Please select your login type:\n";
+        cout << "1. Admin\n";
+        cout << "2. Faculty\n";
+        cout << "3. Student\n";
+        cout << "4. Guest\n";
+        cout << "5. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch(choice) {
+            case '1': {
+                if (login("admin")) {
+                    adminMenu();
+                }
+                break;
+            }
+            case '2': {
+                if (login("faculty")) {
+                    facultyMenu();
+                }
+                break;
+            }
+            case '3': {
+                if (login("student")) {
+                    studentMenu();
+                }
+                break;
+            }
+            case '4': {
+                if (login("guest")) {
+                    // Guest menu will be implemented here.
+                    cout << "Guest login successful. Guest menu will be implemented here.\n";
+                }
+                break;
+            }
+            case '5': {
+                cout << "Exiting...\n";
+                break;
+            }
+            default: {
+                cout << "Invalid choice. Please try again.\n";
+            }
+        }
+    } while(choice != '5');
+
+    return 0;
+}
